@@ -1,5 +1,5 @@
 // jingshin-leave-public/src/components/LeaveForm.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LeaveForm.css';
 
 const LeaveForm: React.FC = () => {
