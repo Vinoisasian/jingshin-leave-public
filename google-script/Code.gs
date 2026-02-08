@@ -78,8 +78,36 @@ function doPost(e) {
       return createResponse({ success: true, note: "Bot detected" });
     }
 
+    const workerSheet = ss.getSheetByName(WORKER_SHEET_NAME);
+    if (!workerSheet) return createResponse({ success: false, error: "System Error: Workers sheet missing" });
+
+    // Validate Worker ID exists
+    const workerData = workerSheet.getDataRange().getValues();
+    let isValidWorker = false;
+    for (let i = 1; i < workerData.length; i++) {
+      if (workerData[i][0].toString() === data.workerId.toString()) {
+        isValidWorker = true;
+        break;
+      }
+    }
+
+    if (!isValidWorker) {
+      return createResponse({ success: false, error: "Invalid Worker ID / 工號錯誤" });
+    }
+
     const sheet = ss.getSheetByName(APP_SHEET_NAME);
     if (!sheet) return createResponse({ success: false, error: "Applications sheet not found" });
+    
+    // Auto-Translate Reason to Chinese
+    let translatedReason = "";
+    if (data.reason) {
+      try {
+        // Translate to Traditional Chinese (zh-TW), auto-detect source
+        translatedReason = LanguageApp.translate(data.reason, "", "zh-TW");
+      } catch (e) {
+        translatedReason = "[Translation Failed]";
+      }
+    }
     
     sheet.appendRow([
       new Date(),             // A: Timestamp
@@ -90,11 +118,12 @@ function doPost(e) {
       data.startTime || "",   // F: Start Time
       data.endDate,           // G: End
       data.endTime || "",     // H: End Time
-      data.reason,            // I: Reason
+      data.reason,            // I: Reason (Original)
       data.ipAddress,         // J: IP Metadata
       data.userAgent,         // K: Device Metadata
       "Pending",              // L: Status
-      ""                      // M: Sync Flag
+      "",                     // M: Sync Flag
+      translatedReason        // N: Reason (Translated)
     ]);
 
     return createResponse({ success: true });

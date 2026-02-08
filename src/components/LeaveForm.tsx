@@ -12,7 +12,7 @@ const LeaveForm: React.FC = () => {
     startDate: '',
     startTime: '08:00',
     endDate: '',
-    endTime: '17:00',
+    endTime: '17:10',
     reason: '',
     honeyPot: ''
   });
@@ -74,6 +74,8 @@ const LeaveForm: React.FC = () => {
     try {
       const payload = {
         ...formData,
+        startTime: formData.startTime || '08:00',
+        endTime: formData.endTime || '17:10',
         ipAddress: ip,
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString()
@@ -94,6 +96,72 @@ const LeaveForm: React.FC = () => {
       alert('提交失敗，請檢查網路 / Submit failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculateDays = () => {
+    if (!formData.startDate || !formData.endDate || !formData.startTime || !formData.endTime) {
+      return '0';
+    }
+
+    const start = new Date(`${formData.startDate}T${formData.startTime}`);
+    const end = new Date(`${formData.endDate}T${formData.endTime}`);
+
+    if (end <= start) return '0';
+
+    const getWorkHoursInDay = (dayStart: Date, dayEnd: Date) => {
+      let dayTotalMs = 0;
+      const blocks = [
+        { startH: 8, startM: 0, endH: 12, endM: 0 },
+        { startH: 13, startM: 0, endH: 17, endM: 0 }
+      ];
+
+      for (const b of blocks) {
+        const bStart = new Date(dayStart);
+        bStart.setHours(b.startH, b.startM, 0, 0);
+        const bEnd = new Date(dayStart);
+        bEnd.setHours(b.endH, b.endM, 0, 0);
+
+        const overlapStart = dayStart < bStart ? bStart : dayStart;
+        const overlapEnd = dayEnd > bEnd ? bEnd : dayEnd;
+
+        if (overlapEnd > overlapStart) {
+          dayTotalMs += (overlapEnd.getTime() - overlapStart.getTime());
+        }
+      }
+      return dayTotalMs / (1000 * 60 * 60);
+    };
+
+    let totalHours = 0;
+    const sDate = new Date(formData.startDate);
+    sDate.setHours(0,0,0,0);
+    const eDate = new Date(formData.endDate);
+    eDate.setHours(0,0,0,0);
+    
+    const diffDays = Math.round((eDate.getTime() - sDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    for (let i = 0; i <= diffDays; i++) {
+      const loopDate = new Date(sDate);
+      loopDate.setDate(loopDate.getDate() + i);
+      
+      let intervalStart = new Date(loopDate);
+      intervalStart.setHours(8, 0, 0, 0);
+      let intervalEnd = new Date(loopDate);
+      intervalEnd.setHours(17, 10, 0, 0);
+
+      if (i === 0) intervalStart = start;
+      if (i === diffDays) intervalEnd = end;
+
+      totalHours += getWorkHoursInDay(intervalStart, intervalEnd);
+    }
+
+    totalHours = Math.round(totalHours * 10) / 10;
+    if (totalHours < 8) {
+      return `${totalHours} 小時`;
+    } else {
+      const days = totalHours / 8;
+      const formattedDays = days % 1 === 0 ? days : days.toFixed(1);
+      return `${formattedDays} 天`;
     }
   };
 
@@ -208,6 +276,12 @@ const LeaveForm: React.FC = () => {
               />
             </div>
           </div>
+
+          {formData.startDate && formData.endDate && (
+            <div className="est-days-box">
+              預估天數 (Estimated): <strong>{calculateDays()}</strong>
+            </div>
+          )}
 
           <div className="form-section">
             <label>請假原因 (Reason) *</label>
