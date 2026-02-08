@@ -1,5 +1,5 @@
 // jingshin-leave-public/src/App.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import LeaveForm from './components/LeaveForm';
 import LanguageSelection from './components/LanguageSelection';
 import { Language } from './locales';
