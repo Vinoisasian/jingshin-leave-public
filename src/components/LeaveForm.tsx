@@ -1,8 +1,15 @@
-// jingshin-leave-public/src/components/LeaveForm.tsx
 import React, { useState, useEffect } from 'react';
+import { translations, Language } from '../locales';
 import './LeaveForm.css';
 
-const LeaveForm: React.FC = () => {
+interface LeaveFormProps {
+  lang: Language;
+  onBack: () => void;
+}
+
+const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
+  const t = translations[lang];
+  
   const [formData, setFormData] = useState({
     workerId: '',
     workerName: '',
@@ -57,45 +64,12 @@ const LeaveForm: React.FC = () => {
           role: data.role
         }));
       } else {
-        setError('找不到員工工號 / Worker ID not found');
+        setError(t.error_id_not_found);
       }
     } catch (e) {
-      setError('網路連線錯誤 / Connection error');
+      setError(t.error_network);
     } finally {
       setFetchingName(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.workerName) return;
-
-    setLoading(true);
-    try {
-      const payload = {
-        ...formData,
-        startTime: formData.startTime || '08:00',
-        endTime: formData.endTime || '17:10',
-        ipAddress: ip,
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString()
-      };
-
-      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
-      await fetch(baseUrl, {
-        method: 'POST',
-        mode: 'no-cors', // Google Scripts require no-cors for simple POST
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      // Since no-cors doesn't return success state, we assume it sent 
-      // or you can use a more advanced fetch setup.
-      setSubmitted(true);
-    } catch (e) {
-      alert('提交失敗，請檢查網路 / Submit failed');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -157,11 +131,42 @@ const LeaveForm: React.FC = () => {
 
     totalHours = Math.round(totalHours * 10) / 10;
     if (totalHours < 8) {
-      return `${totalHours} 小時`;
+      return `${totalHours} Hours`; // We can translate this too if needed later
     } else {
       const days = totalHours / 8;
       const formattedDays = days % 1 === 0 ? days : days.toFixed(1);
-      return `${formattedDays} 天`;
+      return `${formattedDays} Days`;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.workerName) return;
+
+    setLoading(true);
+    try {
+      const payload = {
+        ...formData,
+        startTime: formData.startTime || '08:00',
+        endTime: formData.endTime || '17:10',
+        ipAddress: ip,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      };
+
+      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
+      await fetch(baseUrl, {
+        method: 'POST',
+        mode: 'no-cors', // Google Scripts require no-cors for simple POST
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      setSubmitted(true);
+    } catch (e) {
+      alert(t.error_network);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -170,10 +175,9 @@ const LeaveForm: React.FC = () => {
       <div className="success-container">
         <div className="success-card">
           <div className="check-icon">✓</div>
-          <h2>提交成功！</h2>
-          <p>您的請假申請已送到後台審核。</p>
-          <p className="en-sub">Application submitted for approval.</p>
-          <button onClick={() => window.location.reload()}>返回 / Back</button>
+          <h2>{t.success_title}</h2>
+          <p>{t.success_desc}</p>
+          <button onClick={() => window.location.reload()}>{t.back}</button>
         </div>
       </div>
     );
@@ -182,9 +186,11 @@ const LeaveForm: React.FC = () => {
   return (
     <div className="public-form-container">
       <div className="form-card">
+        <button className="back-link" onClick={onBack}>← {t.back}</button>
+        
         <div className="form-header">
-          <h1>晶欣股份有限公司</h1>
-          <p>員工請假申請單 (Public)</p>
+          <h1>Jingshin</h1>
+          <p>{t.welcome}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -197,20 +203,20 @@ const LeaveForm: React.FC = () => {
           />
 
           <div className="form-section">
-            <label>工號 (Worker ID) *</label>
+            <label>{t.worker_id} *</label>
             <input
               type="text"
               className={`input-main ${error ? 'error' : ''}`}
-              placeholder="例如: 14070"
+              placeholder={t.id_placeholder}
               value={formData.workerId}
               onChange={e => setFormData({...formData, workerId: e.target.value.replace(/\D/g, '').slice(0, 5)})}
               required
             />
-            {fetchingName && <small>驗證中...</small>}
+            {fetchingName && <small>{t.verifying}</small>}
             
             {formData.workerName && (
               <div className="worker-info-box">
-                <div className="info-name">您好, {formData.workerName}</div>
+                <div className="info-name">{t.hello}, {formData.workerName}</div>
                 <div className="info-details">
                   {formData.dept && <span className="info-badge">{formData.dept}</span>}
                   {formData.role && <span className="info-badge outline">{formData.role}</span>}
@@ -223,23 +229,23 @@ const LeaveForm: React.FC = () => {
 
           <div className="form-row">
             <div className="form-section">
-              <label>假別 (Type) *</label>
+              <label>{t.leave_type} *</label>
               <select 
                 value={formData.leaveType}
                 onChange={e => setFormData({...formData, leaveType: e.target.value})}
               >
-                <option value="personal">事假 (Personal)</option>
-                <option value="sick">病假 (Sick)</option>
-                <option value="annual">特休 (Annual)</option>
-                <option value="menstrual">生理假 (Menstrual)</option>
-                <option value="bereavement">喪假 (Bereavement)</option>
+                <option value="personal">{t.personal}</option>
+                <option value="sick">{t.sick}</option>
+                <option value="annual">{t.annual}</option>
+                <option value="menstrual">{t.menstrual}</option>
+                <option value="bereavement">{t.bereavement}</option>
               </select>
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-section">
-              <label>開始日期 (Start Date) *</label>
+              <label>{t.start_date} *</label>
               <input 
                 type="date" 
                 required 
@@ -248,7 +254,7 @@ const LeaveForm: React.FC = () => {
               />
             </div>
             <div className="form-section">
-              <label>時間 (Time)</label>
+              <label>{t.time}</label>
               <input 
                 type="time" 
                 value={formData.startTime}
@@ -259,7 +265,7 @@ const LeaveForm: React.FC = () => {
 
           <div className="form-row">
             <div className="form-section">
-              <label>結束日期 (End Date) *</label>
+              <label>{t.end_date} *</label>
               <input 
                 type="date" 
                 required 
@@ -268,7 +274,7 @@ const LeaveForm: React.FC = () => {
               />
             </div>
             <div className="form-section">
-              <label>時間 (Time)</label>
+              <label>{t.time}</label>
               <input 
                 type="time" 
                 value={formData.endTime}
@@ -279,14 +285,14 @@ const LeaveForm: React.FC = () => {
 
           {formData.startDate && formData.endDate && (
             <div className="est-days-box">
-              預估天數 (Estimated): <strong>{calculateDays()}</strong>
+              {t.est_days}: <strong>{calculateDays()}</strong>
             </div>
           )}
 
           <div className="form-section">
-            <label>請假原因 (Reason) *</label>
+            <label>{t.reason} *</label>
             <textarea
-              placeholder="請簡述原因..."
+              placeholder={t.reason_placeholder}
               value={formData.reason}
               onChange={e => setFormData({...formData, reason: e.target.value})}
               required
@@ -298,11 +304,11 @@ const LeaveForm: React.FC = () => {
             className="submit-btn" 
             disabled={loading || !formData.workerName || !!error}
           >
-            {loading ? '提交中...' : '確認送出 (Submit)'}
+            {loading ? t.submitting : t.submit}
           </button>
 
           <div className="footer-info">
-            IP: {ip} | Device: {navigator.platform}
+            IP: {ip}
           </div>
         </form>
       </div>
