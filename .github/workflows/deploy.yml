@@ -24,7 +24,7 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
-          npm install
+          npm ci
           npm run build
         env:
           # This injects your secret into the Vite build process
