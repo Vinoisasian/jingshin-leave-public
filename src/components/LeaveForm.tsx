@@ -6,6 +6,8 @@ const LeaveForm: React.FC = () => {
   const [formData, setFormData] = useState({
     workerId: '',
     workerName: '',
+    role: '',
+    dept: '',
     leaveType: 'personal',
     startDate: '',
     startTime: '08:00',
@@ -34,7 +36,7 @@ const LeaveForm: React.FC = () => {
     if (formData.workerId.length === 5) {
       verifyWorker(formData.workerId);
     } else {
-      setFormData(prev => ({ ...prev, workerName: '' }));
+      setFormData(prev => ({ ...prev, workerName: '', role: '', dept: '' }));
       setError('');
     }
   }, [formData.workerId]);
@@ -48,7 +50,12 @@ const LeaveForm: React.FC = () => {
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
-        setFormData(prev => ({ ...prev, workerName: data.name }));
+        setFormData(prev => ({ 
+          ...prev, 
+          workerName: data.name,
+          dept: data.dept,
+          role: data.role
+        }));
       } else {
         setError('找不到員工工號 / Worker ID not found');
       }
@@ -132,7 +139,17 @@ const LeaveForm: React.FC = () => {
               required
             />
             {fetchingName && <small>驗證中...</small>}
-            {formData.workerName && <div className="welcome-msg">您好, {formData.workerName}</div>}
+            
+            {formData.workerName && (
+              <div className="worker-info-box">
+                <div className="info-name">您好, {formData.workerName}</div>
+                <div className="info-details">
+                  {formData.dept && <span className="info-badge">{formData.dept}</span>}
+                  {formData.role && <span className="info-badge outline">{formData.role}</span>}
+                </div>
+              </div>
+            )}
+            
             {error && <div className="error-msg">{error}</div>}
           </div>
 

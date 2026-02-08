@@ -28,7 +28,8 @@ function doGet(e) {
         return createResponse({
           success: true,
           name: data[i][1], // Column B
-          dept: data[i][2]  // Column C
+          dept: data[i][2], // Column C
+          role: data[i][3]  // Column D
         });
       }
     }
@@ -59,13 +60,12 @@ function doPost(e) {
       // Clear existing content (except header)
       const lastRow = sheet.getLastRow();
       if (lastRow > 1) {
-        sheet.getRange(2, 1, lastRow - 1, 3).clearContent();
+        sheet.getRange(2, 1, lastRow - 1, 4).clearContent();
       }
 
       // Add new workers if any
-      // Expecting data.workers to be [[id, name, dept], [id, name, dept]...]
       if (data.workers && data.workers.length > 0) {
-        sheet.getRange(2, 1, data.workers.length, 3).setValues(data.workers);
+        sheet.getRange(2, 1, data.workers.length, 4).setValues(data.workers);
       }
 
       return createResponse({ success: true, message: `Synced ${data.workers.length} workers` });

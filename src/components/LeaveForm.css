@@ -74,20 +74,48 @@ textarea {
   resize: vertical;
 }
 
-.welcome-msg {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #e1f5fe;
-  color: #0288d1;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+.worker-info-box {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0f7ff;
+  border: 1px solid #cce5ff;
+  border-radius: 10px;
+}
+
+.info-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #004085;
+  margin-bottom: 6px;
+}
+
+.info-details {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.info-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #0056b3;
+  color: white;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.info-badge.outline {
+  background: transparent;
+  border: 1px solid #0056b3;
+  color: #0056b3;
 }
 
 .error-msg {
   margin-top: 8px;
   color: #e53935;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .submit-btn {
