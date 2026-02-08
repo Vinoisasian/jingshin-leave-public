@@ -43,7 +43,8 @@ const LeaveForm: React.FC = () => {
     setFetchingName(true);
     setError('');
     try {
-      const url = `${import.meta.env.VITE_GOOGLE_SCRIPT_URL}?workerId=${id}`;
+      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
+      const url = `${baseUrl}?workerId=${id}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
@@ -71,7 +72,8 @@ const LeaveForm: React.FC = () => {
         timestamp: new Date().toISOString()
       };
 
-      await fetch(import.meta.env.VITE_GOOGLE_SCRIPT_URL, {
+      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
+      await fetch(baseUrl, {
         method: 'POST',
         mode: 'no-cors', // Google Scripts require no-cors for simple POST
         headers: { 'Content-Type': 'application/json' },
