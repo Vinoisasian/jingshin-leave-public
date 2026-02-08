@@ -29,6 +29,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
   const [fetchingName, setFetchingName] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [balance, setBalance] = useState<number | null>(null);
 
   // Get IP Metadata on load
   useEffect(() => {
@@ -44,6 +45,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
       verifyWorker(formData.workerId);
     } else {
       setFormData(prev => ({ ...prev, workerName: '', role: '', dept: '' }));
+      setBalance(null);
       setError('');
     }
   }, [formData.workerId]);
@@ -63,8 +65,10 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
           dept: data.dept,
           role: data.role
         }));
+        setBalance(data.balance !== undefined ? data.balance : null);
       } else {
         setError(t.error_id_not_found);
+        setBalance(null);
       }
     } catch (e) {
       setError(t.error_network);
@@ -230,16 +234,25 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
           <div className="form-row">
             <div className="form-section">
               <label>{t.leave_type} *</label>
-              <select 
-                value={formData.leaveType}
-                onChange={e => setFormData({...formData, leaveType: e.target.value})}
-              >
-                <option value="personal">{t.personal}</option>
-                <option value="sick">{t.sick}</option>
-                <option value="annual">{t.annual}</option>
-                <option value="menstrual">{t.menstrual}</option>
-                <option value="bereavement">{t.bereavement}</option>
-              </select>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <select 
+                  style={{ flex: 1 }}
+                  value={formData.leaveType}
+                  onChange={e => setFormData({...formData, leaveType: e.target.value})}
+                >
+                  <option value="personal">{t.personal}</option>
+                  <option value="sick">{t.sick}</option>
+                  <option value="annual">{t.annual}</option>
+                  <option value="menstrual">{t.menstrual}</option>
+                  <option value="bereavement">{t.bereavement}</option>
+                </select>
+                
+                {formData.leaveType === 'annual' && balance !== null && (
+                  <div className="public-balance-badge" title="Remaining Annual Leave">
+                    💎 <strong>{balance}</strong> <small>d</small>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

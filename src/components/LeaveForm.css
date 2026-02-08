@@ -159,11 +159,32 @@ textarea {
   margin-left: 5px;
 }
 
+.public-balance-badge {
+  background: #eff6ff;
+  border: 1px solid #3b82f6;
+  color: #1d4ed8;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .footer-info {
-  margin-top: 25px;
+  margin-top: 24px;
   text-align: center;
   font-size: 11px;
-  color: #95a5a6;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
 }
 
 /* Success State */

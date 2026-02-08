@@ -29,7 +29,8 @@ function doGet(e) {
           success: true,
           name: data[i][1], // Column B
           dept: data[i][2], // Column C
-          role: data[i][3]  // Column D
+          role: data[i][3], // Column D
+          balance: data[i][4] // Column E (Annual Leave Balance)
         });
       }
     }
@@ -50,25 +51,77 @@ function doPost(e) {
 
     // --- ACTION 1: SYNC WORKERS (From Local Server) ---
     if (data.action === 'sync_workers') {
-      if (data.secret !== API_SECRET) {
-        return createResponse({ success: false, error: "Unauthorized" });
-      }
+      if (data.secret !== API_SECRET) return createResponse({ success: false, error: "Unauthorized" });
 
       const sheet = ss.getSheetByName(WORKER_SHEET_NAME);
       if (!sheet) return createResponse({ success: false, error: "Workers sheet not found" });
 
-      // Clear existing content (except header)
       const lastRow = sheet.getLastRow();
+      const lastCol = sheet.getLastColumn() || 5;
       if (lastRow > 1) {
-        sheet.getRange(2, 1, lastRow - 1, 4).clearContent();
+        sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
       }
 
-      // Add new workers if any
       if (data.workers && data.workers.length > 0) {
-        sheet.getRange(2, 1, data.workers.length, 4).setValues(data.workers);
+        const numRows = data.workers.length;
+        const numCols = data.workers[0].length;
+        sheet.getRange(2, 1, numRows, numCols).setValues(data.workers);
       }
 
-      return createResponse({ success: true, message: `Synced ${data.workers.length} workers` });
+      return createResponse({ success: true, message: `Synced ${data.workers.length} workers with ${data.workers[0].length} columns` });
+    }
+
+    // --- ACTION 3: GET PENDING LEAVES (From Local Server) ---
+    if (data.action === 'get_pending_leaves') {
+      if (data.secret !== API_SECRET) return createResponse({ success: false, error: "Unauthorized" });
+
+      const sheet = ss.getSheetByName(APP_SHEET_NAME);
+      if (!sheet) return createResponse({ success: false, error: "Apps sheet not found" });
+
+      const lastRow = sheet.getLastRow();
+      if (lastRow <= 1) return createResponse({ success: true, data: [] });
+
+      // Read all data (Cols A to N)
+      const range = sheet.getRange(2, 1, lastRow - 1, 14);
+      const values = range.getValues();
+      const pending = [];
+
+      for (let i = 0; i < values.length; i++) {
+        // Col M (Index 12) is Synced status. If empty, it's pending.
+        if (values[i][12] === "") {
+          pending.push({
+            rowIndex: i + 2, // 1-based index, +1 for header
+            timestamp: values[i][0],
+            workerId: values[i][1],
+            leaveType: values[i][3],
+            startDate: values[i][4],
+            startTime: values[i][5],
+            endDate: values[i][6],
+            endTime: values[i][7],
+            reason: values[i][8],
+            translatedReason: values[i][13] // Col N
+          });
+        }
+      }
+
+      return createResponse({ success: true, data: pending });
+    }
+
+    // --- ACTION 4: MARK SYNCED (From Local Server) ---
+    if (data.action === 'mark_synced') {
+      if (data.secret !== API_SECRET) return createResponse({ success: false, error: "Unauthorized" });
+
+      const sheet = ss.getSheetByName(APP_SHEET_NAME);
+      const rowIndices = data.rowIndices; // Array of integers
+
+      if (rowIndices && rowIndices.length > 0) {
+        rowIndices.forEach(idx => {
+          // Col M is 13th column
+          sheet.getRange(idx, 13).setValue("YES");
+        });
+      }
+
+      return createResponse({ success: true, count: rowIndices.length });
     }
 
     // --- ACTION 2: SUBMIT LEAVE (From Frontend) ---
