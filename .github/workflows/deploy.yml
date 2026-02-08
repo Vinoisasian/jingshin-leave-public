@@ -1,0 +1,38 @@
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ] # Runs every time you push to main
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: jingshin-leave-public/package.json
+
+      - name: Install and Build 🔧
+        run: |
+          cd jingshin-leave-public
+          npm install
+          npm run build
+        env:
+          # This injects your secret into the Vite build process
+          VITE_GOOGLE_SCRIPT_URL: ${{ secrets.VITE_GOOGLE_SCRIPT_URL }}
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: jingshin-leave-public/dist # The folder Vite creates
+          branch: gh-pages # The branch where the website lives
