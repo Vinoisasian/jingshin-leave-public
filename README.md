@@ -1,39 +1,46 @@
-# Jingshin Public Leave System
+# Jingshin Public Leave Portal (v1.3.0)
 
-This is a mobile-ready, public-facing leave application form that stores data in Google Sheets.
+A professional, mobile-responsive web portal designed for **Jingshin Ltd.** employees to submit leave applications remotely. This system acts as a secure bridge between a public interface and the internal local HR management system.
 
-## Setup Instructions
+## 🌟 Key Features
 
-### 1. Google Sheets Setup
-1. Create a new Google Sheet.
-2. Rename the first tab to **"Workers"**.
-   - Column A: ID (e.g., 14070)
-   - Column B: Name (e.g., 王小明)
-   - Column C: Department
-3. Create a second tab named **"Applications"**. 
-   - Headers: Timestamp, ID, Name, Type, Start, StartTime, End, EndTime, Reason, IP, Device, Status, Sync.
+- **ID Verification:** Real-time worker validation against the master employee list.
+- **Multilingual Support:** Instant switching between **Traditional Chinese (繁)**, **English (EN)**, and **Vietnamese (VI)**.
+- **Milestone Balance Display:** Integrated with the local "Milestone Bucket" system to show remaining annual leave days in real-time.
+- **Google Drive Attachments:** Optional document upload (Images/PDF) stored securely in a private Google Drive folder.
+- **Auto-Translation:** Automatically translates leave reasons to Traditional Chinese using Google Language Services for HR processing.
+- **Mobile Optimized:** Modern UI with subtle wave animations and smooth transitions.
 
-### 2. Google Apps Script
-1. In your Sheet, go to **Extensions > Apps Script**.
-2. Copy the contents of `google-script/Code.gs` from this project into the editor.
-3. Click **Deploy > New Deployment**.
-   - Select type: **Web App**.
-   - Description: Leave API.
-   - Execute as: **Me**.
-   - Who has access: **Anyone**.
-4. Copy the **Web App URL** (ends in `/exec`).
+## 🏗️ How It Works (The Architecture)
 
-### 3. Frontend Configuration
-1. Create a `.env` file in the root of this project.
-2. Paste your URL: `VITE_GOOGLE_SCRIPT_URL=YOUR_URL_HERE`.
+The system operates as a hybrid cloud-local ecosystem:
 
-### 4. Running Locally
-```bash
-npm install
-npm run dev
-```
+1. **Frontend (GitHub Pages):** A lightweight React/Vite application that collects worker data and leave details.
+2. **Middleman (Google Apps Script):**
+   * Handles incoming API requests from the frontend.
+   * Validates Worker IDs against a Google Sheet.
+   * Processes Base64 attachments and saves them to **Google Drive**.
+   * Stores pending applications in a Google Sheet "Inbox".
+3. **Local Synchronization (Node.js Backend):**
+   * A local server runs a cron job every **10 minutes**.
+   * It "pulls" new applications from the Google Sheet.
+   * It "downloads" high-resolution attachments from Google Drive to the local server storage.
+   * It updates the local MySQL database and calculates the new leave balance.
+   * Every **15 minutes**, it "pushes" the latest employee list and updated leave balances back to the Google Sheet so the portal stays accurate.
 
-### 5. GitHub Deployment
-1. Push this code to a GitHub Repository.
-2. Go to **Settings > Pages** and set up deployment (usually via GitHub Actions for Vite).
-3. **IMPORTANT:** In **Settings > Secrets and Variables > Actions**, add your `VITE_GOOGLE_SCRIPT_URL` so the build can use it safely.
+## 🛠️ Tech Stack
+
+- **Frontend:** React + TypeScript + Vite
+- **Storage:** Google Sheets (Database Cache) + Google Drive (File Storage)
+- **Engine:** Google Apps Script (Serverless API)
+- **Local Integration:** Node.js (Cron Sync Service)
+
+## 🔐 Security & Privacy
+
+- **Protected Access:** The leave form is hidden until a valid company ID is provided.
+- **Private Storage:** Attachments are saved to a private Drive folder, accessible only by the script and the authorized local HR server.
+- **Bot Protection:** Includes a "Honey Pot" field to prevent automated spam submissions.
+
+---
+
+*© 2026 Jingshin Ltd. - Human Resources Administration System*
