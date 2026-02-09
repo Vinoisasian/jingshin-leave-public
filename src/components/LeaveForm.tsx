@@ -16,6 +16,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
     workerName: '',
     role: '',
     dept: '',
+    gender: '',
     leaveType: 'personal',
     startDate: '',
     startTime: '08:00',
@@ -48,7 +49,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
     if (formData.workerId.length === 5) {
       verifyWorker(formData.workerId);
     } else {
-      setFormData(prev => ({ ...prev, workerName: '', role: '', dept: '' }));
+      setFormData(prev => ({ ...prev, workerName: '', role: '', dept: '', gender: '' }));
       setBalance(null);
       setError('');
       setShowForm(false);
@@ -68,7 +69,8 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
           ...prev, 
           workerName: data.name,
           dept: data.dept,
-          role: data.role
+          role: data.role,
+          gender: data.gender || ''
         }));
         setBalance(data.balance !== undefined ? data.balance : null);
         // Add a tiny delay for smooth transition
@@ -249,6 +251,9 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
     );
   }
 
+  // Determine if Menstrual leave is allowed
+  const isMenstrualAllowed = formData.gender === '女' && formData.workerId.startsWith('15');
+
   // --- RENDERING LANDING VIEW ---
   if (!showForm) {
     return (
@@ -341,7 +346,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
                 <option value="personal">{t.personal}</option>
                 <option value="sick">{t.sick}</option>
                 <option value="annual">{t.annual}</option>
-                <option value="menstrual">{t.menstrual}</option>
+                {isMenstrualAllowed && <option value="menstrual">{t.menstrual}</option>}
                 <option value="bereavement">{t.bereavement}</option>
               </select>
               

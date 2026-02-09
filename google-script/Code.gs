@@ -54,7 +54,8 @@ function doGet(e) {
           name: data[i][1], // Column B
           dept: data[i][2], // Column C
           role: data[i][3], // Column D
-          balance: data[i][4] // Column E (Annual Leave Balance)
+          balance: data[i][4], // Column E
+          gender: data[i][5] // Column F (New: Gender)
         });
       }
     }
@@ -93,7 +94,7 @@ function doPost(e) {
       if (!sheet) return createResponse({ success: false, error: "Workers sheet not found" });
 
       const lastRow = sheet.getLastRow();
-      const lastCol = sheet.getLastColumn() || 5;
+      const lastCol = sheet.getLastColumn() || 6; // Increased to 6
       if (lastRow > 1) {
         sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
       }
