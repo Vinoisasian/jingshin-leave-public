@@ -5,9 +5,10 @@ import './LeaveForm.css';
 interface LeaveFormProps {
   lang: Language;
   onBack: () => void;
+  setLang: (lang: Language) => void;
 }
 
-const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
+const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack, setLang }) => {
   const t = translations[lang];
   
   const [formData, setFormData] = useState({
@@ -21,7 +22,9 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
     endDate: '',
     endTime: '17:10',
     reason: '',
-    honeyPot: ''
+    honeyPot: '',
+    attachment: null as string | null,
+    attachmentName: ''
   });
 
   const [ip, setIp] = useState('0.0.0.0');
@@ -30,6 +33,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   // Get IP Metadata on load
   useEffect(() => {
@@ -47,6 +51,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
       setFormData(prev => ({ ...prev, workerName: '', role: '', dept: '' }));
       setBalance(null);
       setError('');
+      setShowForm(false);
     }
   }, [formData.workerId]);
 
@@ -66,15 +71,44 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
           role: data.role
         }));
         setBalance(data.balance !== undefined ? data.balance : null);
+        // Add a tiny delay for smooth transition
+        setTimeout(() => setShowForm(true), 300);
       } else {
         setError(t.error_id_not_found);
         setBalance(null);
+        setShowForm(false);
       }
     } catch (e) {
       setError(t.error_network);
     } finally {
       setFetchingName(false);
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File too large (Max 5MB)");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setFormData(prev => ({
+        ...prev,
+        attachment: base64,
+        attachmentName: file.name
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeFile = () => {
+    setFormData(prev => ({ ...prev, attachment: null, attachmentName: '' }));
   };
 
   const calculateDays = () => {
@@ -135,7 +169,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
 
     totalHours = Math.round(totalHours * 10) / 10;
     if (totalHours < 8) {
-      return `${totalHours} Hours`; // We can translate this too if needed later
+      return `${totalHours} Hours`;
     } else {
       const days = totalHours / 8;
       const formattedDays = days % 1 === 0 ? days : days.toFixed(1);
@@ -161,7 +195,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
       const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
       await fetch(baseUrl, {
         method: 'POST',
-        mode: 'no-cors', // Google Scripts require no-cors for simple POST
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
@@ -176,155 +210,191 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack }) => {
 
   if (submitted) {
     return (
-      <div className="success-container">
-        <div className="success-card">
-          <div className="check-icon">✓</div>
-          <h2>{t.success_title}</h2>
-          <p>{t.success_desc}</p>
-          <button onClick={() => window.location.reload()}>{t.back}</button>
-        </div>
+      <div className="success-card fade-in">
+        <div className="check-icon">✓</div>
+        <h2>{t.success_title}</h2>
+        <p>{t.success_desc}</p>
+        <button onClick={() => window.location.reload()}>{t.back}</button>
       </div>
     );
   }
 
-  return (
-    <div className="public-form-container">
-      <div className="form-card">
-        <button className="back-link" onClick={onBack}>← {t.back}</button>
-        
+  // --- RENDERING LANDING VIEW ---
+  if (!showForm) {
+    return (
+      <div className="form-card landing-card fade-in">
         <div className="form-header">
-          <h1>Jingshin</h1>
           <p>{t.welcome}</p>
+          <h1>Jingshin</h1>
+          <p>{t.portal_title}</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* Bot Trap */}
-          <input 
-            type="text" 
-            style={{ display: 'none' }} 
-            value={formData.honeyPot} 
-            onChange={e => setFormData({...formData, honeyPot: e.target.value})} 
+        <div className="form-section">
+          <input
+            type="text"
+            className={`id-input-large ${error ? 'error' : ''}`}
+            placeholder={t.id_placeholder}
+            value={formData.workerId}
+            onChange={e => setFormData({...formData, workerId: e.target.value.replace(/\D/g, '').slice(0, 5)})}
+            autoFocus
           />
+          {fetchingName && <small className="verifying-text">{t.verifying}</small>}
+          {error && <div className="error-msg">{error}</div>}
+        </div>
 
+        <div className="lang-mini-grid">
+          <button className={`lang-btn ${lang === 'zh' ? 'active' : ''}`} onClick={() => setLang('zh')}>繁</button>
+          <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
+          <button className={`lang-btn ${lang === 'vi' ? 'active' : ''}`} onClick={() => setLang('vi')}>VI</button>
+        </div>
+
+        <div className="version-footer">{t.version_footer}</div>
+      </div>
+    );
+  }
+
+  // --- RENDERING ACTUAL FORM ---
+  return (
+    <div className="form-card fade-in">
+      <button className="back-link" onClick={() => setShowForm(false)}>
+        ← {t.back}
+      </button>
+      
+      <div className="form-header">
+        <h1>Jingshin</h1>
+        <div className="worker-info-box">
+          <div className="info-name">{t.hello}, {formData.workerName}</div>
+          <div className="info-details">
+            {formData.dept && <span className="info-badge">{formData.dept}</span>}
+            {formData.role && <span className="info-badge outline">{formData.role}</span>}
+            <span className="info-badge outline">ID: {formData.workerId}</span>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <input 
+          type="text" 
+          style={{ display: 'none' }} 
+          value={formData.honeyPot} 
+          onChange={e => setFormData({...formData, honeyPot: e.target.value})} 
+        />
+
+        <div className="form-row">
           <div className="form-section">
-            <label>{t.worker_id} *</label>
-            <input
-              type="text"
-              className={`input-main ${error ? 'error' : ''}`}
-              placeholder={t.id_placeholder}
-              value={formData.workerId}
-              onChange={e => setFormData({...formData, workerId: e.target.value.replace(/\D/g, '').slice(0, 5)})}
-              required
-            />
-            {fetchingName && <small>{t.verifying}</small>}
-            
-            {formData.workerName && (
-              <div className="worker-info-box">
-                <div className="info-name">{t.hello}, {formData.workerName}</div>
-                <div className="info-details">
-                  {formData.dept && <span className="info-badge">{formData.dept}</span>}
-                  {formData.role && <span className="info-badge outline">{formData.role}</span>}
+            <label>📄 {t.leave_type} *</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select 
+                style={{ flex: 1 }}
+                value={formData.leaveType}
+                onChange={e => setFormData({...formData, leaveType: e.target.value})}
+              >
+                <option value="personal">{t.personal}</option>
+                <option value="sick">{t.sick}</option>
+                <option value="annual">{t.annual}</option>
+                <option value="menstrual">{t.menstrual}</option>
+                <option value="bereavement">{t.bereavement}</option>
+              </select>
+              
+              {formData.leaveType === 'annual' && balance !== null && (
+                <div className="public-balance-badge" title="Remaining Annual Leave">
+                  💎 <strong>{balance}</strong> <small>d</small>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-section">
+            <label>📅 {t.start_date} *</label>
+            <input 
+              type="date" 
+              required 
+              value={formData.startDate}
+              onChange={e => setFormData({...formData, startDate: e.target.value})}
+            />
+          </div>
+          <div className="form-section">
+            <label>⏰ {t.time}</label>
+            <input 
+              type="time" 
+              value={formData.startTime}
+              onChange={e => setFormData({...formData, startTime: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-section">
+            <label>📅 {t.end_date} *</label>
+            <input 
+              type="date" 
+              required 
+              value={formData.endDate}
+              onChange={e => setFormData({...formData, endDate: e.target.value})}
+            />
+          </div>
+          <div className="form-section">
+            <label>⏰ {t.time}</label>
+            <input 
+              type="time" 
+              value={formData.endTime}
+              onChange={e => setFormData({...formData, endTime: e.target.value})}
+            />
+          </div>
+        </div>
+
+        {formData.startDate && formData.endDate && (
+          <div className="est-days-box">
+            {t.est_days}: <strong>{calculateDays()}</strong>
+          </div>
+        )}
+
+        <div className="form-section">
+          <label>💬 {t.reason} *</label>
+          <textarea
+            placeholder={t.reason_placeholder}
+            value={formData.reason}
+            onChange={e => setFormData({...formData, reason: e.target.value})}
+            required
+          ></textarea>
+        </div>
+
+        <div className="form-section">
+          <label>📎 {t.attachment}</label>
+          {!formData.attachment ? (
+            <div className="file-upload-container">
+              <input 
+                type="file" 
+                className="file-input-hidden" 
+                accept="image/*,.pdf"
+                onChange={handleFileChange}
+              />
+              <div className="file-upload-icon">📁</div>
+              <div className="file-upload-text">{t.attachment_hint}</div>
+            </div>
+          ) : (
+            <div className="file-selected-badge">
+              <div className="file-info">
+                <span>📎</span>
+                <span>{formData.attachmentName}</span>
               </div>
-            )}
-            
-            {error && <div className="error-msg">{error}</div>}
-          </div>
-
-          <div className="form-row">
-            <div className="form-section">
-              <label>{t.leave_type} *</label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <select 
-                  style={{ flex: 1 }}
-                  value={formData.leaveType}
-                  onChange={e => setFormData({...formData, leaveType: e.target.value})}
-                >
-                  <option value="personal">{t.personal}</option>
-                  <option value="sick">{t.sick}</option>
-                  <option value="annual">{t.annual}</option>
-                  <option value="menstrual">{t.menstrual}</option>
-                  <option value="bereavement">{t.bereavement}</option>
-                </select>
-                
-                {formData.leaveType === 'annual' && balance !== null && (
-                  <div className="public-balance-badge" title="Remaining Annual Leave">
-                    💎 <strong>{balance}</strong> <small>d</small>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-section">
-              <label>{t.start_date} *</label>
-              <input 
-                type="date" 
-                required 
-                value={formData.startDate}
-                onChange={e => setFormData({...formData, startDate: e.target.value})}
-              />
-            </div>
-            <div className="form-section">
-              <label>{t.time}</label>
-              <input 
-                type="time" 
-                value={formData.startTime}
-                onChange={e => setFormData({...formData, startTime: e.target.value})}
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-section">
-              <label>{t.end_date} *</label>
-              <input 
-                type="date" 
-                required 
-                value={formData.endDate}
-                onChange={e => setFormData({...formData, endDate: e.target.value})}
-              />
-            </div>
-            <div className="form-section">
-              <label>{t.time}</label>
-              <input 
-                type="time" 
-                value={formData.endTime}
-                onChange={e => setFormData({...formData, endTime: e.target.value})}
-              />
-            </div>
-          </div>
-
-          {formData.startDate && formData.endDate && (
-            <div className="est-days-box">
-              {t.est_days}: <strong>{calculateDays()}</strong>
+              <button type="button" className="remove-file" onClick={removeFile}>×</button>
             </div>
           )}
+        </div>
 
-          <div className="form-section">
-            <label>{t.reason} *</label>
-            <textarea
-              placeholder={t.reason_placeholder}
-              value={formData.reason}
-              onChange={e => setFormData({...formData, reason: e.target.value})}
-              required
-            ></textarea>
-          </div>
+        <button 
+          type="submit" 
+          className="submit-btn" 
+          disabled={loading}
+        >
+          {loading ? t.submitting : t.submit}
+        </button>
 
-          <button 
-            type="submit" 
-            className="submit-btn" 
-            disabled={loading || !formData.workerName || !!error}
-          >
-            {loading ? t.submitting : t.submit}
-          </button>
-
-          <div className="footer-info">
-            IP: {ip}
-          </div>
-        </form>
-      </div>
+        <div className="version-footer">{t.version_footer}</div>
+      </form>
     </div>
   );
 };

@@ -1,13 +1,16 @@
 export const en = {
-  welcome: "Select Language",
+  welcome: "Welcome to",
+  portal_title: "Employee Leave Portal",
   worker_id: "Worker ID",
-  id_placeholder: "e.g., 14070",
+  id_placeholder: "Please input your ID (5 digits)",
   leave_type: "Leave Type",
   start_date: "Start Date",
   end_date: "End Date",
   time: "Time",
   reason: "Reason",
   reason_placeholder: "Briefly describe reason...",
+  attachment: "Attachment (Optional)",
+  attachment_hint: "Click to upload supporting documents",
   submit: "Submit",
   submitting: "Submitting...",
   success_title: "Submitted Successfully!",
@@ -18,6 +21,7 @@ export const en = {
   est_days: "Estimated Duration",
   error_id_not_found: "Worker ID Not Found",
   error_network: "Network Error",
+  version_footer: "© 2026 Jingshin Ltd. - v1.2.9",
 
   // Types
   personal: "Personal Leave",

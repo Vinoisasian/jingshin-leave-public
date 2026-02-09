@@ -1,13 +1,16 @@
 export const vi = {
-  welcome: "Chọn Ngôn Ngữ",
+  welcome: "Chào mừng đến với",
+  portal_title: "Cổng thông tin nghỉ phép",
   worker_id: "Mã số nhân viên",
-  id_placeholder: "Ví dụ: 14070",
+  id_placeholder: "Vui lòng nhập mã số (5 chữ số)",
   leave_type: "Loại nghỉ",
   start_date: "Ngày bắt đầu",
   end_date: "Ngày kết thúc",
   time: "Giờ",
   reason: "Lý do",
   reason_placeholder: "Mô tả ngắn gọn...",
+  attachment: "Đính kèm (Không bắt buộc)",
+  attachment_hint: "Nhấn để tải lên tài liệu minh chứng",
   submit: "Gửi đơn",
   submitting: "Đang gửi...",
   success_title: "Gửi thành công!",
@@ -18,6 +21,7 @@ export const vi = {
   est_days: "Thời gian dự kiến",
   error_id_not_found: "Không tìm thấy mã nhân viên",
   error_network: "Lỗi kết nối",
+  version_footer: "© 2026 Jingshin Ltd. - v1.2.9",
 
   // Types
   personal: "Nghỉ việc riêng (Personal)",

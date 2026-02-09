@@ -1,20 +1,22 @@
 // jingshin-leave-public/src/App.tsx
 import { useState } from 'react';
 import LeaveForm from './components/LeaveForm';
-import LanguageSelection from './components/LanguageSelection';
 import { Language } from './locales';
 
 function App() {
-  const [lang, setLang] = useState<Language | null>(null);
+  const [lang, setLang] = useState<Language>('zh');
 
   return (
-    <>
-      {!lang ? (
-        <LanguageSelection onSelect={setLang} />
-      ) : (
-        <LeaveForm lang={lang} onBack={() => setLang(null)} />
-      )}
-    </>
+    <div className="app-container">
+      {/* Wave Background Layers */}
+      <div className="wave-bg"></div>
+      <div className="wave-bg-2"></div>
+      
+      {/* Main Content */}
+      <div className="content-layer">
+        <LeaveForm lang={lang} onBack={() => {}} setLang={setLang} />
+      </div>
+    </div>
   );
 }
 

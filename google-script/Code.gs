@@ -6,7 +6,8 @@
 const SPREADSHEET_ID = "1Xw1iP-UUO8i2v8rEaOEpDQfc_0kI0n1VttgiWueTvVo";
 const WORKER_SHEET_NAME = "Workers";
 const APP_SHEET_NAME = "Applications";
-const API_SECRET = "jingshin_secure_sync_2026"; // Simple password protection for sync
+const ATTACHMENT_FOLDER_ID = "1MtFZN42y6SZsDSC_Yrye5A-Fzkt__vAD";
+const API_SECRET = "jingshin_secure_sync_2026";
 
 /**
  * GET Request: ID Lookup
@@ -81,8 +82,8 @@ function doPost(e) {
       const lastRow = sheet.getLastRow();
       if (lastRow <= 1) return createResponse({ success: true, data: [] });
 
-      // Read all data (Cols A to N)
-      const range = sheet.getRange(2, 1, lastRow - 1, 14);
+      // Read all data (Cols A to O) - Increased to O for attachments
+      const range = sheet.getRange(2, 1, lastRow - 1, 15);
       const values = range.getValues();
       const pending = [];
 
@@ -90,7 +91,7 @@ function doPost(e) {
         // Col M (Index 12) is Synced status. If empty, it's pending.
         if (values[i][12] === "") {
           pending.push({
-            rowIndex: i + 2, // 1-based index, +1 for header
+            rowIndex: i + 2,
             timestamp: values[i][0],
             workerId: values[i][1],
             leaveType: values[i][3],
@@ -99,7 +100,8 @@ function doPost(e) {
             endDate: values[i][6],
             endTime: values[i][7],
             reason: values[i][8],
-            translatedReason: values[i][13] // Col N
+            translatedReason: values[i][13], // Col N
+            attachmentId: values[i][14] // Col O
           });
         }
       }
@@ -155,10 +157,26 @@ function doPost(e) {
     let translatedReason = "";
     if (data.reason) {
       try {
-        // Translate to Traditional Chinese (zh-TW), auto-detect source
         translatedReason = LanguageApp.translate(data.reason, "", "zh-TW");
       } catch (e) {
         translatedReason = "[Translation Failed]";
+      }
+    }
+
+    // --- HANDLE ATTACHMENT ---
+    let fileId = "";
+    if (data.attachment && data.attachment.includes("base64,")) {
+      try {
+        const folder = DriveApp.getFolderById(ATTACHMENT_FOLDER_ID);
+        const parts = data.attachment.split(",");
+        const type = parts[0].split(":")[1].split(";")[0];
+        const bytes = Utilities.base64Decode(parts[1]);
+        const blob = Utilities.newBlob(bytes, type, data.attachmentName || "attachment");
+        const file = folder.createFile(blob);
+        fileId = file.getId();
+      } catch (e) {
+        // Log but don't fail upload
+        console.error("Attachment save failed:", e.toString());
       }
     }
     
@@ -176,7 +194,8 @@ function doPost(e) {
       data.userAgent,         // K: Device Metadata
       "Pending",              // L: Status
       "",                     // M: Sync Flag
-      translatedReason        // N: Reason (Translated)
+      translatedReason,       // N: Reason (Translated)
+      fileId                  // O: Google Drive File ID
     ]);
 
     return createResponse({ success: true });
