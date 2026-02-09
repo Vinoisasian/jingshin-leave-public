@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { translations, Language } from '../locales';
+import heic2any from 'heic2any';
 import './LeaveForm.css';
 
 interface LeaveFormProps {
@@ -84,26 +85,56 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    let file = e.target.files?.[0];
     if (!file) return;
 
-    // Check size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File too large (Max 5MB)");
+    // Check size (max 10MB for HEIC as they can be large before conversion)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File too large (Max 10MB)");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setFormData(prev => ({
-        ...prev,
-        attachment: base64,
-        attachmentName: file.name
-      }));
-    };
-    reader.readAsDataURL(file);
+    setLoading(true); // Show loading during conversion
+    let fileName = file.name;
+
+    try {
+      // Check if it's HEIC/HEIF
+      const lowerName = fileName.toLowerCase();
+      if (lowerName.endsWith('.heic') || lowerName.endsWith('.heif')) {
+        console.log("[HEIC] Converting to JPG...");
+        const blob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.7
+        });
+        
+        // Convert Blob to File object
+        const convertedBlob = Array.isArray(blob) ? blob[0] : blob;
+        file = new File([convertedBlob], fileName.replace(/\.[^/.]+$/, ".jpg"), {
+          type: 'image/jpeg',
+          lastModified: new Date().getTime()
+        });
+        fileName = file.name;
+        console.log("[HEIC] Conversion complete:", fileName);
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFormData(prev => ({
+          ...prev,
+          attachment: base64,
+          attachmentName: fileName
+        }));
+        setLoading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("[HEIC] Conversion failed:", err);
+      alert("Failed to process image format. Please try a standard JPG/PNG.");
+      setLoading(false);
+    }
   };
 
   const removeFile = () => {

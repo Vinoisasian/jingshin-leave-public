@@ -43,6 +43,18 @@ function doGet(e) {
 }
 
 /**
+ * Helper: Ensure headers exist
+ */
+function initHeaders(sheet) {
+  const headers = ["Timestamp", "ID", "Name", "Type", "Start", "StartTime", "End", "EndTime", "Reason", "IP", "Device", "Status", "Sync", "Translated Reason", "Attachment ID"];
+  const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  
+  if (currentHeaders.length < headers.length) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+}
+
+/**
  * POST Request: Submit Application OR Sync Workers
  */
 function doPost(e) {
@@ -79,11 +91,13 @@ function doPost(e) {
       const sheet = ss.getSheetByName(APP_SHEET_NAME);
       if (!sheet) return createResponse({ success: false, error: "Apps sheet not found" });
 
+      initHeaders(sheet); // Make sure column O exists
+
       const lastRow = sheet.getLastRow();
       if (lastRow <= 1) return createResponse({ success: true, data: [] });
 
-      // Read all data (Cols A to O)
-      const range = sheet.getRange(2, 1, lastRow - 1, 15);
+      const lastCol = Math.max(sheet.getLastColumn(), 15);
+      const range = sheet.getRange(2, 1, lastRow - 1, lastCol);
       const values = range.getValues();
       const pending = [];
 
@@ -100,8 +114,8 @@ function doPost(e) {
             endDate: values[i][6],
             endTime: values[i][7],
             reason: values[i][8],
-            translatedReason: values[i][13], // Col N
-            attachmentId: values[i][14]      // Col O
+            translatedReason: values[i][13], 
+            attachmentId: values[i][14] || ""
           });
         }
       }
