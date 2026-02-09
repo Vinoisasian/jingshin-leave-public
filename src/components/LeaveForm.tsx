@@ -4,11 +4,10 @@ import './LeaveForm.css';
 
 interface LeaveFormProps {
   lang: Language;
-  onBack: () => void;
   setLang: (lang: Language) => void;
 }
 
-const LeaveForm: React.FC<LeaveFormProps> = ({ lang, onBack, setLang }) => {
+const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
   const t = translations[lang];
   
   const [formData, setFormData] = useState({

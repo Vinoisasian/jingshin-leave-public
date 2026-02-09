@@ -69,7 +69,7 @@ function doPost(e) {
         sheet.getRange(2, 1, numRows, numCols).setValues(data.workers);
       }
 
-      return createResponse({ success: true, message: `Synced ${data.workers.length} workers with ${data.workers[0].length} columns` });
+      return createResponse({ success: true, message: `Synced ${data.workers.length} workers` });
     }
 
     // --- ACTION 3: GET PENDING LEAVES (From Local Server) ---
@@ -82,7 +82,7 @@ function doPost(e) {
       const lastRow = sheet.getLastRow();
       if (lastRow <= 1) return createResponse({ success: true, data: [] });
 
-      // Read all data (Cols A to O) - Increased to O for attachments
+      // Read all data (Cols A to O)
       const range = sheet.getRange(2, 1, lastRow - 1, 15);
       const values = range.getValues();
       const pending = [];
@@ -101,7 +101,7 @@ function doPost(e) {
             endTime: values[i][7],
             reason: values[i][8],
             translatedReason: values[i][13], // Col N
-            attachmentId: values[i][14] // Col O
+            attachmentId: values[i][14]      // Col O
           });
         }
       }
@@ -114,11 +114,10 @@ function doPost(e) {
       if (data.secret !== API_SECRET) return createResponse({ success: false, error: "Unauthorized" });
 
       const sheet = ss.getSheetByName(APP_SHEET_NAME);
-      const rowIndices = data.rowIndices; // Array of integers
+      const rowIndices = data.rowIndices;
 
       if (rowIndices && rowIndices.length > 0) {
         rowIndices.forEach(idx => {
-          // Col M is 13th column
           sheet.getRange(idx, 13).setValue("YES");
         });
       }
@@ -127,8 +126,6 @@ function doPost(e) {
     }
 
     // --- ACTION 2: SUBMIT LEAVE (From Frontend) ---
-    
-    // Simple bot protection
     if (data.honeyPot && data.honeyPot.length > 0) {
       return createResponse({ success: true, note: "Bot detected" });
     }
@@ -153,7 +150,7 @@ function doPost(e) {
     const sheet = ss.getSheetByName(APP_SHEET_NAME);
     if (!sheet) return createResponse({ success: false, error: "Applications sheet not found" });
     
-    // Auto-Translate Reason to Chinese
+    // Auto-Translate Reason
     let translatedReason = "";
     if (data.reason) {
       try {
@@ -175,7 +172,6 @@ function doPost(e) {
         const file = folder.createFile(blob);
         fileId = file.getId();
       } catch (e) {
-        // Log but don't fail upload
         console.error("Attachment save failed:", e.toString());
       }
     }

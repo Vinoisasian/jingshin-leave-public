@@ -14,7 +14,7 @@ function App() {
       
       {/* Main Content */}
       <div className="content-layer">
-        <LeaveForm lang={lang} onBack={() => {}} setLang={setLang} />
+        <LeaveForm lang={lang} setLang={setLang} />
       </div>
     </div>
   );
