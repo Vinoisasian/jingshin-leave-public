@@ -24,7 +24,7 @@ export const en = {
   est_days: "Estimated Duration",
   error_id_not_found: "Worker ID Not Found",
   error_network: "Network Error",
-  version_footer: "© 2026 Jingshin Ltd. - v1.3.1",
+  version_footer: "© 2026 Jingshin Ltd. - v1.3.2",
 
   // Types
   personal: "Personal Leave",

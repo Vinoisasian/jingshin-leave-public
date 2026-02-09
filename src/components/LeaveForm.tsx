@@ -223,10 +223,10 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
       };
 
       const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
+      
+      // Sending as text/plain string to avoid CORS preflight issues with large payloads
       await fetch(baseUrl, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 

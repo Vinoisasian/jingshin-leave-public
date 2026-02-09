@@ -10,6 +10,29 @@ const ATTACHMENT_FOLDER_ID = "1MtFZN42y6SZsDSC_Yrye5A-Fzkt__vAD";
 const API_SECRET = "jingshin_secure_sync_2026";
 
 /**
+ * Helper: Log errors to a dedicated sheet
+ */
+function logError(error, context) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let logSheet = ss.getSheetByName("Logs");
+    if (!logSheet) {
+      logSheet = ss.insertSheet("Logs");
+      logSheet.appendRow(["Timestamp", "Context", "Error"]);
+    }
+    logSheet.appendRow([new Date(), context, error]);
+  } catch (e) {}
+}
+
+/**
+ * Run this function once manually in the editor to authorize Drive access!
+ */
+function triggerAuthorization() {
+  const folder = DriveApp.getFolderById(ATTACHMENT_FOLDER_ID);
+  console.log("Drive Access Authorized. Folder Name: " + folder.getName());
+}
+
+/**
  * GET Request: ID Lookup
  */
 function doGet(e) {
@@ -176,41 +199,42 @@ function doPost(e) {
 
     // --- HANDLE ATTACHMENT ---
     let fileId = "";
-    if (data.attachment && data.attachment.includes("base64,")) {
+    if (data.attachment && data.attachment.toString().indexOf("base64,") !== -1) {
       try {
         const folder = DriveApp.getFolderById(ATTACHMENT_FOLDER_ID);
         const parts = data.attachment.split(",");
-        const type = parts[0].split(":")[1].split(";")[0];
+        const mimeType = parts[0].split(":")[1].split(";")[0];
         const bytes = Utilities.base64Decode(parts[1]);
-        const blob = Utilities.newBlob(bytes, type, data.attachmentName || "attachment");
+        const blob = Utilities.newBlob(bytes, mimeType, data.attachmentName || "attachment");
         const file = folder.createFile(blob);
         fileId = file.getId();
       } catch (e) {
-        console.error("Attachment save failed:", e.toString());
+        logError(e.toString(), "Attachment Creation: " + data.workerId);
       }
     }
     
     sheet.appendRow([
-      new Date(),             // A: Timestamp
-      data.workerId,          // B: ID
-      data.workerName,        // C: Name
-      data.leaveType,         // D: Type
-      data.startDate,         // E: Start
-      data.startTime || "",   // F: Start Time
-      data.endDate,           // G: End
-      data.endTime || "",     // H: End Time
-      data.reason,            // I: Reason (Original)
-      data.ipAddress,         // J: IP Metadata
-      data.userAgent,         // K: Device Metadata
-      "Pending",              // L: Status
-      "",                     // M: Sync Flag
-      translatedReason,       // N: Reason (Translated)
-      fileId                  // O: Google Drive File ID
+      new Date(),             // A
+      data.workerId,          // B
+      data.workerName,        // C
+      data.leaveType,         // D
+      data.startDate,         // E
+      data.startTime || "",   // F
+      data.endDate,           // G
+      data.endTime || "",     // H
+      data.reason,            // I
+      data.ipAddress,         // J
+      data.userAgent,         // K
+      "Pending",              // L
+      "",                     // M
+      translatedReason,       // N
+      fileId                  // O
     ]);
 
     return createResponse({ success: true });
 
   } catch (err) {
+    logError(err.toString(), "Main doPost Error");
     return createResponse({ success: false, error: err.toString() });
   }
 }
