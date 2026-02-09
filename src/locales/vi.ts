@@ -18,6 +18,8 @@ export const vi = {
   back: "Quay lại",
   verifying: "Đang kiểm tra...",
   hello: "Xin chào",
+  dept: "Phòng ban",
+  role: "Chức vụ",
   est_days: "Thời gian dự kiến",
   error_id_not_found: "Không tìm thấy mã nhân viên",
   error_network: "Lỗi kết nối",

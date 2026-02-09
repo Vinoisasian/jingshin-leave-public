@@ -18,6 +18,8 @@ export const zh = {
   back: "返回",
   verifying: "驗證中...",
   hello: "您好",
+  dept: "部門",
+  role: "職位",
   est_days: "預估天數",
   error_id_not_found: "找不到員工工號",
   error_network: "網路連線錯誤",

@@ -18,6 +18,8 @@ export const en = {
   back: "Back",
   verifying: "Verifying...",
   hello: "Hello",
+  dept: "Department",
+  role: "Role",
   est_days: "Estimated Duration",
   error_id_not_found: "Worker ID Not Found",
   error_network: "Network Error",
