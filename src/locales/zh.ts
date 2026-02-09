@@ -1,6 +1,7 @@
 export const zh = {
-  welcome: "歡迎使用",
-  portal_title: "員工請假門戶",
+  welcome: "歡迎",
+  company_name: "晶欣",
+  portal_title: "員工請假申請網站",
   worker_id: "工號",
   id_placeholder: "請輸入您的工號 (5位數)",
   leave_type: "假別",
@@ -17,13 +18,13 @@ export const zh = {
   success_desc: "您的請假申請已送到後台審核。",
   back: "返回",
   verifying: "驗證中...",
-  hello: "您好",
+  hello: "姓名",
   dept: "部門",
   role: "職位",
   est_days: "預估天數",
   error_id_not_found: "找不到員工工號",
   error_network: "網路連線錯誤",
-  version_footer: "© 2026 Jingshin Ltd. - v1.2.9",
+  version_footer: "© 2026 Jingshin Ltd. - v1.3.0",
   
   // Types
   personal: "事假",

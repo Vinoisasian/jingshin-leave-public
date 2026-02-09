@@ -1,5 +1,6 @@
 export const vi = {
   welcome: "Chào mừng đến với",
+  company_name: "Jingshin",
   portal_title: "Cổng thông tin nghỉ phép",
   worker_id: "Mã số nhân viên",
   id_placeholder: "Vui lòng nhập mã số (5 chữ số)",
@@ -17,13 +18,13 @@ export const vi = {
   success_desc: "Đơn xin nghỉ của bạn đã được gửi để duyệt.",
   back: "Quay lại",
   verifying: "Đang kiểm tra...",
-  hello: "Xin chào",
+  hello: "Tên họ",
   dept: "Phòng ban",
   role: "Chức vụ",
   est_days: "Thời gian dự kiến",
   error_id_not_found: "Không tìm thấy mã nhân viên",
   error_network: "Lỗi kết nối",
-  version_footer: "© 2026 Jingshin Ltd. - v1.2.9",
+  version_footer: "© 2026 Jingshin Ltd. - v1.3.0",
 
   // Types
   personal: "Nghỉ việc riêng (Personal)",

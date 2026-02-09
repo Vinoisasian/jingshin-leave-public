@@ -1,5 +1,6 @@
 export const en = {
   welcome: "Welcome to",
+  company_name: "Jingshin",
   portal_title: "Employee Leave Portal",
   worker_id: "Worker ID",
   id_placeholder: "Please input your ID (5 digits)",
@@ -17,13 +18,13 @@ export const en = {
   success_desc: "Your application has been sent for approval.",
   back: "Back",
   verifying: "Verifying...",
-  hello: "Hello",
+  hello: "Name",
   dept: "Department",
   role: "Role",
   est_days: "Estimated Duration",
   error_id_not_found: "Worker ID Not Found",
   error_network: "Network Error",
-  version_footer: "© 2026 Jingshin Ltd. - v1.2.9",
+  version_footer: "© 2026 Jingshin Ltd. - v1.3.0",
 
   // Types
   personal: "Personal Leave",

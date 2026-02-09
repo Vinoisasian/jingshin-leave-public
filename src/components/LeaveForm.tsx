@@ -224,7 +224,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
       <div className="form-card landing-card fade-in">
         <div className="form-header">
           <p>{t.welcome}</p>
-          <h1>Jingshin</h1>
+          <h1>{t.company_name}</h1>
           <p>{t.portal_title}</p>
         </div>
 
@@ -260,7 +260,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
       </button>
       
       <div className="form-header">
-        <h1>Jingshin</h1>
+        <h1>{t.company_name}</h1>
         <p className="portal-subtitle">{t.portal_title}</p>
         
         <div className="formal-worker-card">
