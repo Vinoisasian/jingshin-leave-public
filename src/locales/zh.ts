@@ -24,7 +24,7 @@ export const zh = {
   est_days: "預估天數",
   error_id_not_found: "找不到員工工號",
   error_network: "網路連線錯誤",
-  version_footer: "© 2026 Jingshin Ltd. - v1.3.2",
+  version_footer: "© 2026 Jingshin Ltd. - v1.3.3",
   
   // Types
   personal: "事假",

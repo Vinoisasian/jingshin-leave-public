@@ -59,7 +59,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
     setFetchingName(true);
     setError('');
     try {
-      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
+      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbxyK7ai_mdEa34IWPOVr-0l5IpCVuU1LlWuPbFNlZlncM9BxhNrPuUlwuPB5JO1Xsg9/exec';
       const url = `${baseUrl}?workerId=${id}`;
       const res = await fetch(url);
       const data = await res.json();
@@ -222,7 +222,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
         timestamp: new Date().toISOString()
       };
 
-      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycby06HeOx1uFB8gM1tMvok2mchvjLgNajKnSkGTRGFvNQXg0ZTQVpIo-EiTuUnlMg1xK/exec';
+      const baseUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbxyK7ai_mdEa34IWPOVr-0l5IpCVuU1LlWuPbFNlZlncM9BxhNrPuUlwuPB5JO1Xsg9/exec';
       
       // Sending as text/plain string to avoid CORS preflight issues with large payloads
       await fetch(baseUrl, {

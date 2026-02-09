@@ -24,7 +24,7 @@ export const vi = {
   est_days: "Thời gian dự kiến",
   error_id_not_found: "Không tìm thấy mã nhân viên",
   error_network: "Lỗi kết nối",
-  version_footer: "© 2026 Jingshin Ltd. - v1.3.2",
+  version_footer: "© 2026 Jingshin Ltd. - v1.3.3",
 
   // Types
   personal: "Nghỉ việc riêng (Personal)",
