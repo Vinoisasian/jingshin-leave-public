@@ -261,12 +261,31 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ lang, setLang }) => {
       
       <div className="form-header">
         <h1>Jingshin</h1>
-        <div className="worker-info-box">
-          <div className="info-name">{t.hello}, {formData.workerName}</div>
-          <div className="info-details">
-            {formData.dept && <span className="info-badge">{formData.dept}</span>}
-            {formData.role && <span className="info-badge outline">{formData.role}</span>}
-            <span className="info-badge outline">ID: {formData.workerId}</span>
+        <p className="portal-subtitle">{t.portal_title}</p>
+        
+        <div className="formal-worker-card">
+          <div className="formal-row main">
+            <div className="formal-group">
+              <label className="formal-label">{t.worker_id}</label>
+              <div className="formal-value highlight">#{formData.workerId}</div>
+            </div>
+            <div className="formal-group">
+              <label className="formal-label">{t.hello}</label>
+              <div className="formal-value name">{formData.workerName}</div>
+            </div>
+          </div>
+          
+          <div className="formal-divider"></div>
+          
+          <div className="formal-row">
+            <div className="formal-group">
+              <label className="formal-label">{t.dept || 'Department'}</label>
+              <div className="formal-value">{formData.dept || '-'}</div>
+            </div>
+            <div className="formal-group">
+              <label className="formal-label">{t.role || 'Role'}</label>
+              <div className="formal-value">{formData.role || '-'}</div>
+            </div>
           </div>
         </div>
       </div>
